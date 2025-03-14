@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .sidebar-icon {
+    @apply h-6 w-6 text-gray-500 group-hover:text-primary-600;
+  }
+  
+  .nav-link {
+    @apply flex items-center gap-x-3 rounded-lg px-3 py-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-50 text-primary-600;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .card {
+    @apply rounded-lg bg-white p-6 shadow-sm;
+  }
+}
