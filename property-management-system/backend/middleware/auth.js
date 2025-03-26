@@ -35,3 +35,5 @@ export const checkRole = (roles) => {
 };
 
 export default auth;
+
+//default authentication
