@@ -1,12 +1,12 @@
-// src/components/property/PropertyTabs.js
+// src/components/property/PropertyTabs.jsx
 import { useState, useEffect } from "react";
-import { fetchPayments } from "../../../utils/api";
+import { fetchPayments } from "../../utils/api";
 
 // Import tab component views
-import { PropertyOverview } from "./PropertyOverview";
-import { PropertyUnits } from "./PropertyUnits";
-import { PropertyTenants } from "./PropertyTenants";
-import { PropertyPayments } from "./PropertyPayments";
+import { PropertyOverview } from "./tabs/PropertyOverview";
+import { PropertyUnits } from "./tabs/PropertyUnits";
+import { PropertyTenants } from "./tabs/PropertyTenants";
+import { PropertyPayments } from "./tabs/PropertyPayments";
 
 const PropertyTabs = ({
   property,
