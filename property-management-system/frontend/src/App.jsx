@@ -1,44 +1,114 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from './components/layout/MainLayout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Properties from './pages/Properties';
-import PropertyDetail from './pages/PropertyDetail';
-import Tenants from './pages/Tenants';
-import Maintenance from './pages/Maintenance';
-import Payments from './pages/Payments';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import MainLayout from "./components/layout/MainLayout";
+import Dashboard from "./pages/Dashboard";
+import Properties from "./pages/Properties";
+import PropertyDetail from "./pages/PropertyDetail";
+import Tenants from "./pages/Tenants";
+import Payments from "./pages/Payments";
+import Maintenance from "./pages/Maintenance";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import authService from "./services/auth.service";
+import "./App.css";
 
+// Protected route component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem('token');
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  // DEVELOPMENT MODE: Always return true to bypass authentication
+  // In production, you would use: const isAuthenticated = authService.isAuthenticated();
+  const isAuthenticated = true; // Bypass authentication for development
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
-      <Route element={
-        <ProtectedRoute>
-          <MainLayout />
-        </ProtectedRoute>
-      }>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/properties" element={<Properties />} />
-        <Route path="/properties/:id" element={<PropertyDetail />} />
-        <Route path="/tenants" element={<Tenants />} />
-        <Route path="/maintenance" element={<Maintenance />} />
-        <Route path="/payments" element={<Payments />} />
-      </Route>
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/properties"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Properties />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/properties/:id"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PropertyDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tenants"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Tenants />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Payments />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/maintenance"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Maintenance />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch all - redirect to dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
-
-
-//for a test 

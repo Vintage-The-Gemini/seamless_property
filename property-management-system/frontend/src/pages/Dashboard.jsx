@@ -1,147 +1,127 @@
-// src/pages/Dashboard.jsx
-// Purpose: Dashboard page component
-// Demonstrates: Usage of Card component and theme-aware styling
-
-// src/pages/Dashboard.jsx
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Building2, Users, Wallet, Wrench } from 'lucide-react';
-import api from '../services/api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const StatCard = ({ title, value, icon: Icon, trend, color }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-        <h3 className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">{value}</h3>
-        {trend && (
-          <p className={`text-sm mt-2 ${trend > 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}% from last month
-          </p>
-        )}
-      </div>
-      <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
-        <Icon className={`h-6 w-6 ${color}`} />
-      </div>
-    </div>
-  </div>
-);
+import React from "react";
+import { Building2, Users, CreditCard, TrendingUp } from "lucide-react";
 
 const Dashboard = () => {
-  // Fetch dashboard statistics
-  const { data: stats = {} } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: () => api.get('/dashboard/stats'),
-    initialData: {
-      properties: { total: 0, trend: 0 },
-      tenants: { total: 0, trend: 0 },
-      revenue: { total: 0, trend: 0 },
-      maintenance: { total: 0, trend: 0 }
-    }
-  });
+  // Mock data
+  const stats = {
+    totalProperties: 15,
+    totalUnits: 120,
+    occupiedUnits: 102,
+    occupancyRate: 85,
+    totalTenants: 98,
+    monthlyRevenue: 52500,
+    pendingMaintenance: 8,
+  };
 
-  // Fetch revenue data for chart
-  const { data: revenueData = [] } = useQuery({
-    queryKey: ['revenue-chart'],
-    queryFn: () => api.get('/dashboard/revenue'),
-    initialData: []
-  });
-
-  // Fetch recent activities
-  const { data: activities = [] } = useQuery({
-    queryKey: ['recent-activities'],
-    queryFn: () => api.get('/dashboard/activities'),
-    initialData: []
-  });
+  const statCards = [
+    {
+      title: "Properties",
+      value: stats.totalProperties,
+      icon: Building2,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+      increase: "+2.3%",
+    },
+    {
+      title: "Occupancy Rate",
+      value: `${stats.occupancyRate}%`,
+      icon: TrendingUp,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+      increase: "+1.5%",
+    },
+    {
+      title: "Tenants",
+      value: stats.totalTenants,
+      icon: Users,
+      color: "text-purple-600",
+      bgColor: "bg-purple-100",
+      increase: "+3.2%",
+    },
+    {
+      title: "Monthly Revenue",
+      value: `$${stats.monthlyRevenue.toLocaleString()}`,
+      icon: CreditCard,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+      increase: "+4.1%",
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
+    <div className="container mx-auto px-4 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Overview of your property management</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400">
+          Property management overview
+        </p>
       </div>
 
-      {/* Statistics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Properties"
-          value={stats.properties?.total || 0}
-          icon={Building2}
-          trend={stats.properties?.trend}
-          color="text-blue-500"
-        />
-        <StatCard
-          title="Total Tenants"
-          value={stats.tenants?.total || 0}
-          icon={Users}
-          trend={stats.tenants?.trend}
-          color="text-purple-500"
-        />
-        <StatCard
-          title="Monthly Revenue"
-          value={`$${stats.revenue?.total?.toLocaleString() || 0}`}
-          icon={Wallet}
-          trend={stats.revenue?.trend}
-          color="text-green-500"
-        />
-        <StatCard
-          title="Pending Maintenance"
-          value={stats.maintenance?.total || 0}
-          icon={Wrench}
-          trend={stats.maintenance?.trend}
-          color="text-orange-500"
-        />
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => (
+          <div
+            key={index}
+            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow"
+          >
+            <div className="flex items-center">
+              <div
+                className={`p-3 ${stat.bgColor} dark:bg-opacity-20 rounded-full mr-4`}
+              >
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {stat.title}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  {stat.increase} from last month
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Revenue Chart */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue Overview</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="month" stroke="#6B7280" />
-              <YAxis stroke="#6B7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1F2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#F3F4F6'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#8B5CF6" 
-                strokeWidth={2}
-                dot={{ fill: '#8B5CF6' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      {/* Recent Activity */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Recent Activity
+        </h2>
+        <div className="space-y-4">
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            Recent activity will be displayed here
+          </p>
         </div>
       </div>
 
-      {/* Recent Activities */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activities</h2>
-        <div className="space-y-4">
-          {activities.map((activity, index) => (
-            <div 
-              key={index}
-              className="flex items-center py-3 border-b border-gray-100 dark:border-gray-700 last:border-0"
-            >
-              <div className={`p-2 rounded-lg ${activity.color} bg-opacity-10 mr-4`}>
-                {activity.icon}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
-              </div>
-            </div>
-          ))}
+      {/* Properties Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Properties Overview
+          </h2>
+          <div className="space-y-4">
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+              Property overview will be displayed here
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Payment Summary
+          </h2>
+          <div className="space-y-4">
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+              Payment summary will be displayed here
+            </p>
+          </div>
         </div>
       </div>
     </div>

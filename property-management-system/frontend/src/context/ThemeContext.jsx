@@ -1,48 +1,80 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useState, useContext, useEffect } from "react";
 
+// Create theme context
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    // Check local storage or system preference
-    const savedTheme = localStorage.getItem('theme');
+// Theme provider component
+export const ThemeProvider = ({ children }) => {
+  // Check if theme is stored in localStorage, otherwise use system preference
+  const getInitialTheme = () => {
+    // Check localStorage
+    const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       return savedTheme;
     }
-    // Check system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  });
 
-  useEffect(() => {
-    // Update localStorage and document class when theme changes
-    localStorage.setItem('theme', theme);
-    const root = window.document.documentElement;
-    
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    // Check system preference
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      return "dark";
     }
+
+    // Default to light
+    return "light";
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme());
+
+  // Update document with current theme
+  useEffect(() => {
+    const root = window.document.documentElement;
+
+    // Remove both classes first
+    root.classList.remove("light", "dark");
+
+    // Add the current theme
+    root.classList.add(theme);
+
+    // Save theme to localStorage
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
+  // Toggle theme function
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
+
+  // Listen for system preference changes
+  useEffect(() => {
+    if (!localStorage.getItem("theme")) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const handleChange = (e) => {
+        setTheme(e.matches ? "dark" : "light");
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
-export function useTheme() {
+// Custom hook to use the theme context
+export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
-}
+};
+
+export default ThemeContext;

@@ -1,86 +1,47 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL = 'http://localhost:5000/api';
-
+// Create an axios instance with default config
 const api = axios.create({
-  baseURL: BASE_URL,
+  // Use import.meta.env for Vite instead of process.env
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
-
-// Request interceptor
+// Add request interceptor to include auth token
 api.interceptors.request.use(
-    (config) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
-  );
-  
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-
-
-// Response interceptor
+// Add response interceptor to handle common errors
 api.interceptors.response.use(
-    (response) => response.data,
-    async (error) => {
-      if (error.response?.status === 401) {
-        // Handle unauthorized access
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-      return Promise.reject(error);
+  (response) => response,
+  (error) => {
+    // Handle unauthorized responses (expired token)
+    if (error.response && error.response.status === 401) {
+      // Clear local storage and redirect to login
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
     }
-  );
 
-// Auth services
-// Add register function to authService
-export const authService = {
-    login: async (credentials) => {
-      const response = await api.post('/auth/login', credentials);
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
-      return response;
-    },
-    register: async (userData) => {
-      const response = await api.post('/auth/register', userData);
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
-      return response;
-    },
-    logout: () => {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    // Handle server errors
+    if (error.response && error.response.status >= 500) {
+      console.error("Server error:", error.response.data);
     }
-  };
 
+    return Promise.reject(error);
+  }
+);
 
-// Property service methods
-export const propertyService = {
-    getAllProperties: async () => {
-      try {
-        const response = await api.get('/properties');
-        console.log('Properties response:', response);
-        return response;
-      } catch (error) {
-        console.error('Get properties error:', error);
-        throw error;
-      }
-    },
-    
-    createProperty: (data) => api.post('/properties', data),
-    getPropertyById: (id) => api.get(`/properties/${id}`),
-    updateProperty: (id, data) => api.put(`/properties/${id}`, data),
-    deleteProperty: (id) => api.delete(`/properties/${id}`)
-  };
-  
 export default api;
