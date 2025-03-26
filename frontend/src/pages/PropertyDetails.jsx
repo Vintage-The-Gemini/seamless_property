@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Edit, Trash2 } from "lucide-react";
 import { PropertyStats } from "../components/property/PropertyStats";
-import PropertyTabs from "../components/property/PropertyTabs";
+import PropertyTabs from "../components/property/tabs/PropertyTabs";
 import {
   fetchPropertyById,
   updateProperty,

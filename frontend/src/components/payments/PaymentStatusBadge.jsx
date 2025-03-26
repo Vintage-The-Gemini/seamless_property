@@ -1,3 +1,4 @@
+// src/components/payments/PaymentStatusBadge.jsx
 import React from "react";
 
 /**
@@ -10,31 +11,7 @@ import React from "react";
  * @returns {JSX.Element} Styled status badge
  */
 const PaymentStatusBadge = ({ status, balance = 0 }) => {
-  const getStatusDisplay = () => {
-    const statusConfig = {
-      FULL: {
-        className: "bg-green-100 text-green-800",
-        text: "Paid in Full",
-      },
-      PARTIAL: {
-        className: "bg-yellow-100 text-yellow-800",
-        text: `Partial (Balance: $${balance?.toLocaleString()})`,
-      },
-      OVERPAID: {
-        className: "bg-blue-100 text-blue-800",
-        text: `Overpaid (+$${Math.abs(balance)?.toLocaleString()})`,
-      },
-    };
-
-    return (
-      statusConfig[status] || {
-        className: "bg-gray-100 text-gray-800",
-        text: status || "Unknown",
-      }
-    );
-  };
-
-  const { className, text } = getStatusDisplay();
+  const { className, text } = getPaymentStatusDisplay({ status, balance });
 
   return (
     <span
@@ -63,8 +40,10 @@ export const getPaymentStatusDisplay = (payment) => {
 
   const statusText = {
     FULL: "Paid in Full",
-    PARTIAL: `Partial (Balance: $${payment.balance?.toLocaleString()})`,
-    OVERPAID: `Overpaid (+$${Math.abs(payment.balance)?.toLocaleString()})`,
+    PARTIAL: `Partial (Balance: $${payment.balance?.toLocaleString() || 0})`,
+    OVERPAID: `Overpaid (+$${Math.abs(
+      payment.balance || 0
+    )?.toLocaleString()})`,
   };
 
   return {
