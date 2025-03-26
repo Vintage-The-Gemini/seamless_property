@@ -1,61 +1,54 @@
-import { useMemo } from 'react';
+import React, { useMemo } from "react";
 
-const PaymentSummary = ({ payments, property }) => {
-  const summary = useMemo(() => {
-    const total = payments.reduce((acc, payment) => acc + payment.amount, 0);
-    const totalExpected = property.floors?.reduce((acc, floor) => 
-      acc + floor.units.reduce((sum, unit) => 
-        unit.isOccupied ? sum + unit.monthlyRent : sum, 0
-      ), 0
-    ) || 0;
-    
-    const overdue = payments
-      .filter(p => p.status === 'PARTIAL')
-      .reduce((acc, p) => acc + p.balance, 0);
-    
-    const overpaid = payments
-      .filter(p => p.status === 'OVERPAID')
-      .reduce((acc, p) => acc + Math.abs(p.balance), 0);
+const PaymentSummary = ({ payments = [], expectedTotal = 0 }) => {
+  // Calculate payment statistics
+  const stats = useMemo(() => {
+    // Calculate totals
+    const totalPaid = payments.reduce(
+      (sum, payment) => sum + (payment.amount || 0),
+      0
+    );
+    const outstanding = Math.max(0, expectedTotal - totalPaid);
+    const overpayment =
+      totalPaid > expectedTotal ? totalPaid - expectedTotal : 0;
+    const collectionRate =
+      expectedTotal > 0 ? (totalPaid / expectedTotal) * 100 : 0;
 
     return {
-      totalCollected: total,
-      totalExpected,
-      overdue,
-      overpaid,
-      collectionRate: (total / totalExpected * 100).toFixed(1)
+      totalPaid,
+      outstanding,
+      overpayment,
+      collectionRate: Math.round(collectionRate * 10) / 10, // Round to 1 decimal place
+      paymentCount: payments.length,
     };
-  }, [payments, property]);
+  }, [payments, expectedTotal]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+      <div className="bg-white rounded-lg shadow p-4">
         <h4 className="text-sm text-gray-500">Total Collected</h4>
         <p className="text-2xl font-bold text-green-600">
-          ${summary.totalCollected.toLocaleString()}
+          ${stats.totalPaid.toLocaleString()}
         </p>
         <p className="text-sm text-gray-500">
-          Collection Rate: {summary.collectionRate}%
+          Collection Rate: {stats.collectionRate}%
         </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+      <div className="bg-white rounded-lg shadow p-4">
         <h4 className="text-sm text-gray-500">Outstanding Balance</h4>
         <p className="text-2xl font-bold text-red-600">
-          ${summary.overdue.toLocaleString()}
+          ${stats.outstanding.toLocaleString()}
         </p>
-        <p className="text-sm text-gray-500">
-          From partial payments
-        </p>
+        <p className="text-sm text-gray-500">From partial payments</p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+      <div className="bg-white rounded-lg shadow p-4">
         <h4 className="text-sm text-gray-500">Overpayments</h4>
         <p className="text-2xl font-bold text-blue-600">
-          ${summary.overpaid.toLocaleString()}
+          ${stats.overpayment.toLocaleString()}
         </p>
-        <p className="text-sm text-gray-500">
-          Available as credit
-        </p>
+        <p className="text-sm text-gray-500">Available as credit</p>
       </div>
     </div>
   );
